@@ -9,6 +9,7 @@ import { usePortalAuth } from "@/lib/auth/context";
 import { api } from "@/lib/api/client";
 import { daysUntil } from "@/lib/portal/schedule";
 import { pageProps } from "@/lib/motion";
+import { PortalShellSkeleton } from "@/components/portal/PortalSkeletons";
 
 export const Route = createFileRoute("/portal")({
   component: PortalLayout,
@@ -35,11 +36,7 @@ function PortalLayout() {
   if (isLogin) return <Outlet />;
 
   if (!ready || !user || user.role !== "SUBSCRIBER") {
-    return (
-      <div className="grid min-h-screen place-items-center bg-background">
-        <div className="text-sm text-muted-foreground">Loading…</div>
-      </div>
-    );
+    return <PortalShellSkeleton />;
   }
 
   const nav = [
@@ -161,9 +158,9 @@ function PortalShell({
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         {/* <AnimatePresence mode="wait"> */}
-        <motion.div key={pathname} {...pageProps}>
-          {children}
-        </motion.div>
+          <motion.div key={pathname} {...pageProps}>
+            {children}
+          </motion.div>
         {/* </AnimatePresence> */}
       </main>
     </>

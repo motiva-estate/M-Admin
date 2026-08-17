@@ -172,7 +172,49 @@ export function PortalUpdatesSkeleton() {
   );
 }
 
-// ── Account (portal.account) ─────────────────────────────────────────────────
+// ── Portal shell loading state ────────────────────────────────────────────────
+export function PortalShellSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* header */}
+      <div className="border-b border-border bg-gradient-to-br from-[#343149] via-[#3f3b58] to-[#2b2839] text-primary-foreground">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-md bg-white/20" />
+              <div className="space-y-1.5">
+                <Skeleton className="h-5 w-20 bg-white/20" />
+                <Skeleton className="h-3 w-28 bg-white/15" />
+              </div>
+            </div>
+            <Skeleton className="h-8 w-24 rounded-md bg-white/20" />
+          </div>
+          <div className="mt-6 grid grid-cols-3 gap-3 sm:max-w-xl">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                <Skeleton className="h-2.5 w-24 bg-white/20" />
+                <Skeleton className="mt-1.5 h-5 w-10 bg-white/25" />
+                <Skeleton className="mt-1 h-2.5 w-20 bg-white/15" />
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* nav tabs */}
+        <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 sm:px-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="border-b-2 border-transparent px-3 py-3">
+              <Skeleton className="h-4 w-20 bg-white/20" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* content */}
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <PortalOverviewSkeleton />
+      </main>
+    </div>
+  );
+}
 export function PortalAccountSkeleton() {
   return (
     <div className="max-w-2xl space-y-6">

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { CheckCircle2, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { usePortalAuth } from "@/lib/auth/context";
 import { api } from "@/lib/api/client";
-// import { useDirty } from "@/lib/use-dirty";
+import { useDirty } from "@/lib/use-dirty";
 import { pageProps, stagger, staggerItem, slideUp } from "@/lib/motion";
 import { PortalAccountSkeleton } from "@/components/portal/PortalSkeletons";
+
+const BASE = (import.meta.env.VITE_API_BASE_URL as string) || "http://localhost:4000/api";
 
 export const Route = createFileRoute("/portal/account/")({
   head: () => ({
@@ -31,7 +33,7 @@ export const Route = createFileRoute("/portal/account/")({
 });
 
 function PortalAccount() {
-  const { user } = usePortalAuth();
+  const { user, getToken } = usePortalAuth();
   const qc = useQueryClient();
   const clientId = user?.clientId;
 
@@ -41,6 +43,7 @@ function PortalAccount() {
     enabled: !!clientId,
   });
 
+  // ── Contact details state ─────────────────────────────────────────────────
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [emailNotif, setEmailNotif] = useState(true);
@@ -55,7 +58,6 @@ function PortalAccount() {
     }
   }, [client]);
 
-  // Build a plain object from server data so useDirty can compare like-for-like.
   const serverSnapshot = client
     ? {
         email: client.email ?? "",
@@ -65,8 +67,11 @@ function PortalAccount() {
       }
     : null;
 
-  // const dirtyState = { email, phone, emailNotif, whatsappNotif };
-  // const { isDirty, markClean } = useDirty(dirtyState, serverSnapshot);
+  const dirtyState = { email, phone, emailNotif, whatsappNotif };
+  const { isDirty: contactDirty, markClean: markContactClean } = useDirty(
+    dirtyState,
+    serverSnapshot,
+  );
 
   const save = useMutation({
     mutationFn: () =>
@@ -77,10 +82,50 @@ function PortalAccount() {
         notificationPrefs: { email: emailNotif, whatsapp: whatsappNotif },
       }),
     onSuccess: () => {
-      // markClean();
+      markContactClean();
       qc.invalidateQueries({ queryKey: ["portal", "client", clientId] });
       toast.success("Contact details updated");
     },
+    onError: (e: Error) => toast.error(e.message ?? "Save failed"),
+  });
+
+  // ── Password change state ─────────────────────────────────────────────────
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const changePassword = useMutation({
+    mutationFn: async () => {
+      if (newPassword !== confirmPassword) throw new Error("New passwords do not match");
+      if (newPassword.length < 8) throw new Error("New password must be at least 8 characters");
+
+      const token = getToken();
+      const res = await fetch(`${BASE}/auth/password`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: "Password change failed" }));
+        throw new Error(err.message ?? "Password change failed");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.success("Password changed successfully");
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (isLoading) return <PortalAccountSkeleton />;
@@ -92,7 +137,7 @@ function PortalAccount() {
       <motion.div variants={slideUp}>
         <h1 className="font-display text-3xl text-foreground">Account</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          These are the details Motiva uses for reminders and communications.
+          Manage your contact details, notification preferences and password.
         </p>
       </motion.div>
 
@@ -104,9 +149,8 @@ function PortalAccount() {
               <div className="text-sm">
                 <div className="font-medium text-foreground">Confirm your contact details</div>
                 <div className="text-xs text-muted-foreground">
-                  Please review the email and phone below and press{" "}
-                  <span className="font-medium">Save changes</span> so we can send reminders to the
-                  right channels.
+                  Review the email and phone below and press{" "}
+                  <span className="font-medium">Save changes</span> so we can reach you.
                 </div>
               </div>
             </CardContent>
@@ -115,6 +159,7 @@ function PortalAccount() {
       )}
 
       <motion.div className="space-y-6" variants={stagger}>
+        {/* Contact details */}
         <motion.div variants={staggerItem}>
           <Card>
             <CardHeader>
@@ -143,7 +188,7 @@ function PortalAccount() {
                   placeholder="+234 …"
                 />
               </div>
-              <Button onClick={() => save.mutate()} disabled={save.isPending}>{/* || !isDirty */}
+              <Button onClick={() => save.mutate()} disabled={save.isPending || !contactDirty}>
                 {save.isPending ? "Saving…" : "Save changes"}
               </Button>
               {client?.contactConfirmedAt && (
@@ -156,6 +201,7 @@ function PortalAccount() {
           </Card>
         </motion.div>
 
+        {/* Notification preferences */}
         <motion.div variants={staggerItem}>
           <Card>
             <CardHeader>
@@ -181,25 +227,106 @@ function PortalAccount() {
                 <Switch checked={whatsappNotif} onCheckedChange={setWhatsappNotif} />
               </div>
               <p className="text-xs text-muted-foreground">
-                Automated reminders arrive in Phase 2 — your preference is saved now so nothing
-                changes when they switch on.
+                Automated reminders activate in Phase 2 — preferences saved now apply automatically.
               </p>
             </CardContent>
           </Card>
         </motion.div>
 
+        {/* Password change */}
         <motion.div variants={staggerItem}>
           <Card>
             <CardHeader>
-              <CardTitle>Password</CardTitle>
+              <CardTitle>Change password</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Password changes will be handled once accounts are live. For now, use the "Forgot
-                password" link on the sign-in screen to reach the admin team.
-              </p>
-              <Button variant="outline" size="sm" disabled>
-                Change password (coming soon)
+            <CardContent className="space-y-4">
+              {/* Current password */}
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Current password</Label>
+                <div className="relative">
+                  <Input
+                    id="currentPassword"
+                    type={showCurrent ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    autoComplete="current-password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent((v) => !v)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    aria-label={showCurrent ? "Hide" : "Show"}
+                  >
+                    {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New password */}
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New password</Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showNew ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew((v) => !v)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    aria-label={showNew ? "Hide" : "Show"}
+                  >
+                    {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {newPassword && newPassword.length < 8 && (
+                  <p className="text-xs text-destructive">Must be at least 8 characters</p>
+                )}
+              </div>
+
+              {/* Confirm new password */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm new password</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirm ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    aria-label={showConfirm ? "Hide" : "Show"}
+                  >
+                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {confirmPassword && newPassword !== confirmPassword && (
+                  <p className="text-xs text-destructive">Passwords do not match</p>
+                )}
+              </div>
+
+              <Button
+                onClick={() => changePassword.mutate()}
+                disabled={
+                  changePassword.isPending ||
+                  !currentPassword ||
+                  !newPassword ||
+                  !confirmPassword ||
+                  newPassword !== confirmPassword ||
+                  newPassword.length < 8
+                }
+              >
+                {changePassword.isPending ? "Changing…" : "Change password"}
               </Button>
             </CardContent>
           </Card>

@@ -23,7 +23,7 @@ export const Route = createFileRoute("/admin/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { user, ready, login } = useAdminAuth();
+  const { user, ready, login, logout } = useAdminAuth();
   const search = useSearch({ from: "/admin/login" });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,8 +32,8 @@ function LoginPage() {
 
   useEffect(() => {
     if (ready && user) {
-      const home = user.role === "SUBSCRIBER" ? "/portal" : "/admin";
-      navigate({ to: search.redirect ?? home, replace: true });
+      if (user.role === "SUBSCRIBER") return; // never redirect subscribers into admin
+      navigate({ to: search.redirect ?? "/admin", replace: true });
     }
   }, [ready, user, navigate, search.redirect]);
 
@@ -42,9 +42,15 @@ function LoginPage() {
     setSubmitting(true);
     try {
       const u = await login(email, password);
+      if (u.role === "SUBSCRIBER") {
+        await logout();
+        toast.error(
+          "Subscriber accounts cannot access the admin panel. Please use the subscriber portal.",
+        );
+        return;
+      }
       toast.success("Signed in");
-      const home = u.role === "SUBSCRIBER" ? "/portal" : "/admin";
-      navigate({ to: search.redirect ?? home, replace: true });
+      navigate({ to: search.redirect ?? "/admin", replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign in failed");
     } finally {

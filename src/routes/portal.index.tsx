@@ -18,6 +18,7 @@ import {
   phaseIndex,
   type ProjectRefInfo,
 } from "@/lib/portal/project-ref";
+import { PortalOverviewSkeleton } from "@/components/portal/PortalSkeletons";
 
 export const Route = createFileRoute("/portal/")({
   head: () => ({
@@ -43,11 +44,12 @@ function PortalHome() {
     enabled: !!clientId,
   });
 
-  // Next payment across all subs, for the welcome callout.
   const nextDue = subs
     ?.filter((s) => s.nextDueDate && (s.amountPaid ?? 0) < (s.totalPrice ?? s.amount ?? 0))
     .map((s) => ({ sub: s, days: daysUntil(s.nextDueDate) ?? 9999 }))
     .sort((a, b) => a.days - b.days)[0];
+
+  if (isLoading) return <PortalOverviewSkeleton />;
 
   return (
     <div className="space-y-8">
@@ -95,11 +97,7 @@ function PortalHome() {
         </Card>
       )}
 
-      {isLoading && (
-        <div className="text-sm text-muted-foreground">Loading your subscriptions…</div>
-      )}
-
-      {!isLoading && (!subs || subs.length === 0) && (
+      {(!subs || subs.length === 0) && (
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
             No subscriptions yet. Once your first payment is confirmed, your subscription will
@@ -305,201 +303,3 @@ function PhaseStrip({ current }: { current: ProjectRefInfo["projectStatus"] }) {
     </div>
   );
 }
-
-// import { createFileRoute, Link } from "@tanstack/react-router";
-// import { useQuery } from "@tanstack/react-query";
-// import { format } from "date-fns";
-// import { motion } from "framer-motion";
-// import { ArrowRight, CalendarClock, CheckCircle2, CreditCard } from "lucide-react";
-
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { Button } from "@/components/ui/button";
-// import { Progress } from "@/components/ui/progress";
-// import { useAuth } from "@/lib/auth/context";
-// import { api } from "@/lib/api/client";
-// import { daysUntil } from "@/lib/portal/schedule";
-// import { pageProps, stagger, staggerItem, slideUp } from "@/lib/motion";
-// import { PortalOverviewSkeleton } from "@/components/portal/PortalSkeletons";
-
-// export const Route = createFileRoute("/portal/")({
-//   head: () => ({
-//     meta: [
-//       { title: "Overview — Motiva Subscriber Portal" },
-//       { name: "description", content: "Your Motiva subscription overview." },
-//       { name: "robots", content: "noindex, nofollow" },
-//     ],
-//   }),
-//   component: PortalOverview,
-// });
-
-// function PortalOverview() {
-//   const { user } = useAuth();
-//   const clientId = user?.clientId;
-
-//   const { data: subs, isLoading } = useQuery({
-//     queryKey: ["portal", "subscriptions", clientId],
-//     queryFn: () => api.portal.listSubscriptions(),
-//     enabled: !!clientId,
-//   });
-
-//   const { data: client } = useQuery({
-//     queryKey: ["portal", "client", clientId],
-//     queryFn: () => api.portal.getProfile(),
-//     enabled: !!clientId,
-//   });
-
-//   if (isLoading) return <PortalOverviewSkeleton />;
-
-//   const nextDue = (subs ?? [])
-//     .filter((s) => s.nextDueDate && (s.amountPaid ?? 0) < (s.totalPrice ?? s.amount ?? 0))
-//     .map((s) => ({ sub: s, days: daysUntil(s.nextDueDate) ?? 9999 }))
-//     .sort((a, b) => a.days - b.days)[0];
-
-//   const needsConfirm = client && !client.contactConfirmedAt;
-
-//   return (
-//     <motion.div className="space-y-8" {...pageProps}>
-//       {/* Welcome heading */}
-//       <motion.div variants={slideUp}>
-//         <h1 className="font-display text-3xl text-foreground">
-//           Welcome back{client?.firstName ? `, ${client.firstName}` : ""}.
-//         </h1>
-//         <p className="mt-1 text-sm text-muted-foreground">
-//           {subs && subs.length > 0
-//             ? `You have ${subs.length} active subscription${subs.length > 1 ? "s" : ""} with Motiva Estate.`
-//             : "Your portal is ready — subscriptions will appear here once set up by the Motiva team."}
-//         </p>
-//       </motion.div>
-
-//       {/* Confirm contact details banner */}
-//       {needsConfirm && (
-//         <motion.div variants={slideUp}>
-//           <Card className="border-[#D7C49E]/60 bg-[#D7C49E]/10">
-//             <CardContent className="flex items-center justify-between gap-4 py-4">
-//               <div className="text-sm">
-//                 <span className="font-medium text-foreground">Confirm your contact details</span>
-//                 <span className="ml-2 text-muted-foreground">
-//                   — so we can send payment reminders to the right email and number.
-//                 </span>
-//               </div>
-//               <Button asChild size="sm" variant="outline">
-//                 <Link to="/portal/account">Review →</Link>
-//               </Button>
-//             </CardContent>
-//           </Card>
-//         </motion.div>
-//       )}
-
-//       {/* Next payment due */}
-//       {nextDue && (
-//         <motion.div variants={slideUp}>
-//           <Card className={nextDue.days <= 7 ? "border-amber-400/60 bg-amber-50/40 dark:bg-amber-950/20" : ""}>
-//             <CardContent className="flex items-center justify-between gap-4 py-4">
-//               <div className="flex items-center gap-3">
-//                 <CalendarClock className={`h-5 w-5 shrink-0 ${nextDue.days <= 7 ? "text-amber-600" : "text-primary"}`} />
-//                 <div>
-//                   <div className="text-sm font-medium text-foreground">
-//                     {nextDue.days === 0
-//                       ? "Payment due today"
-//                       : nextDue.days < 0
-//                         ? `Payment overdue by ${Math.abs(nextDue.days)} day${Math.abs(nextDue.days) !== 1 ? "s" : ""}`
-//                         : `Next payment in ${nextDue.days} day${nextDue.days !== 1 ? "s" : ""}`}
-//                   </div>
-//                   <div className="text-xs text-muted-foreground">
-//                     {nextDue.sub.plan} · due {format(new Date(nextDue.sub.nextDueDate!), "PPPP")}
-//                   </div>
-//                 </div>
-//               </div>
-//               <Button asChild size="sm" variant={nextDue.days <= 7 ? "default" : "outline"}>
-//                 <Link to="/portal/subscriptions/$id" params={{ id: nextDue.sub._id ?? nextDue.sub.id ?? "" }}>
-//                   Details
-//                 </Link>
-//               </Button>
-//             </CardContent>
-//           </Card>
-//         </motion.div>
-//       )}
-
-//       {/* Subscription cards */}
-//       {subs && subs.length > 0 && (
-//         <motion.div className="space-y-4" variants={stagger}>
-//           <motion.h2 variants={staggerItem} className="font-display text-xl text-foreground">
-//             Your subscriptions
-//           </motion.h2>
-//           {subs.map((sub) => {
-//             const total = sub.totalPrice ?? sub.amount ?? 0;
-//             const paid = sub.amountPaid ?? 0;
-//             const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
-//             const fullyPaid = total > 0 && paid >= total;
-//             return (
-//               <motion.div key={sub._id ?? sub.id} variants={staggerItem}>
-//                 <Card className="group transition-shadow duration-200 hover:shadow-md">
-//                   <CardContent className="space-y-4 py-5">
-//                     <div className="flex items-start justify-between gap-3">
-//                       <div className="min-w-0">
-//                         <div className="flex items-center gap-2">
-//                           <CreditCard className="h-4 w-4 shrink-0 text-muted-foreground" />
-//                           <div className="truncate font-medium text-foreground">{sub.plan}</div>
-//                         </div>
-//                         {sub.projectRef && (
-//                           <div className="mt-0.5 truncate text-xs text-muted-foreground">
-//                             {sub.projectRefType === "land" ? "Land parcel" : "Project"} · {sub.projectRef}
-//                           </div>
-//                         )}
-//                       </div>
-//                       {fullyPaid ? (
-//                         <Badge variant="secondary" className="shrink-0 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-//                           <CheckCircle2 className="mr-1 h-3 w-3" /> Fully paid
-//                         </Badge>
-//                       ) : (
-//                         <Badge variant="outline" className="shrink-0">{sub.status}</Badge>
-//                       )}
-//                     </div>
-
-//                     <div className="space-y-1.5">
-//                       <Progress value={pct} className="h-2" />
-//                       <div className="flex items-center justify-between text-xs text-muted-foreground">
-//                         <span>{sub.currency} {paid.toLocaleString()} paid</span>
-//                         <span>{pct}% of {sub.currency} {total.toLocaleString()}</span>
-//                       </div>
-//                     </div>
-
-//                     {sub.nextDueDate && !fullyPaid && (
-//                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-//                         <CalendarClock className="h-3.5 w-3.5" />
-//                         Next due: {format(new Date(sub.nextDueDate), "PPP")}
-//                       </div>
-//                     )}
-
-//                     <Button asChild variant="ghost" size="sm" className="w-full justify-between">
-//                       <Link to="/portal/subscriptions/$id" params={{ id: sub._id ?? sub.id ?? "" }}>
-//                         View subscription details
-//                         <ArrowRight className="h-4 w-4 opacity-60 transition-transform duration-150 group-hover:translate-x-0.5" />
-//                       </Link>
-//                     </Button>
-//                   </CardContent>
-//                 </Card>
-//               </motion.div>
-//             );
-//           })}
-//         </motion.div>
-//       )}
-
-//       {/* Empty state */}
-//       {subs && subs.length === 0 && (
-//         <motion.div variants={slideUp}>
-//           <Card>
-//             <CardContent className="py-16 text-center">
-//               <CreditCard className="mx-auto mb-4 h-8 w-8 text-muted-foreground/40" />
-//               <div className="font-medium text-foreground">No subscriptions yet</div>
-//               <div className="mt-1 text-sm text-muted-foreground">
-//                 Your subscriptions will appear here once the Motiva team has set them up.
-//               </div>
-//             </CardContent>
-//           </Card>
-//         </motion.div>
-//       )}
-//     </motion.div>
-//   );
-// }

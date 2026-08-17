@@ -103,6 +103,7 @@ export interface AuthState {
 // ── Factory ──────────────────────────────────────────────────────────────────
 
 interface ContextConfig {
+  loginUrl: string;
   refreshUrl: string;
   logoutUrl: string;
   loginPath: string;
@@ -156,7 +157,7 @@ function makeAuthContext(config: ContextConfig) {
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const login = useCallback(async (email: string, password: string): Promise<User> => {
-      const res = await fetch(`${BASE}/auth/login`, {
+      const res = await fetch(`${BASE}${config.loginUrl}`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -234,6 +235,7 @@ function makeAuthContext(config: ContextConfig) {
 // ── Instantiate both contexts ────────────────────────────────────────────────
 
 const adminAuth = makeAuthContext({
+  loginUrl: "/auth/login",
   refreshUrl: "/auth/refresh",
   logoutUrl: "/auth/logout",
   loginPath: "/admin/login",
@@ -242,6 +244,7 @@ const adminAuth = makeAuthContext({
 });
 
 const portalAuth = makeAuthContext({
+  loginUrl: "/auth/portal/login",
   refreshUrl: "/auth/portal/refresh",
   logoutUrl: "/auth/portal/logout",
   loginPath: "/portal/login",
