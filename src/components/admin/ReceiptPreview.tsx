@@ -22,6 +22,17 @@ export interface ReceiptPreviewProps {
   status?: "DRAFT" | "ISSUED" | "VOIDED";
   /** Base64 data URL once the receipt has been issued (server-generated). */
   qrCodeData?: string;
+  // ── Company / sign-off fields ──────────────────────────────────────────
+  companyAddress?: string;
+  companyWebsite?: string;
+  companyEmail?: string;
+  companyPhone?: string;
+  /** Name printed on the signature line (default: "Finance Manager"). */
+  signatory?: string;
+  /** Base64 data URL of uploaded signature / stamp image. */
+  signatureImage?: string;
+  /** Custom disclaimer text. */
+  disclaimer?: string;
 }
 
 const NAVY = "#353046";
@@ -29,7 +40,10 @@ const GOLD = "#D6C29A";
 const STRIPE = "#F2EFE7";
 const TEXT = "#4A4558";
 
-/** A small gold uppercase label used throughout the document. */
+const DEFAULT_DISCLAIMER =
+  "This receipt acknowledges the sum received as shown in the payment details above, based on proof of payment forwarded to us. All payments remain subject to confirmation by our accounts department due to the nature of electronic transaction failures and interruptions.";
+
+/** A small uppercase tracking label used throughout the document. */
 function Label({
   children,
   color = NAVY,
@@ -50,9 +64,10 @@ function Label({
 }
 
 /**
- * The branded Motiva receipt document, laid out at a fixed design width so it
- * can be scaled to fit any preview pane. Visually mirrors the server-generated
- * PDF (navy header, gold accents, payment table, signature + QR).
+ * The branded Motiva receipt document, laid out at a fixed 800 px design width
+ * so it can be scaled uniformly to fit any preview pane. Visually mirrors the
+ * server-generated PDF (navy header with logo, gold accents, payment table,
+ * signature image, QR, company footer).
  */
 export function ReceiptPreview({
   receiptNumber,
@@ -65,16 +80,40 @@ export function ReceiptPreview({
   paymentEntries,
   status,
   qrCodeData,
+  companyAddress,
+  companyWebsite,
+  companyEmail,
+  companyPhone,
+  signatory,
+  signatureImage,
+  disclaimer,
 }: ReceiptPreviewProps) {
   const entries = paymentEntries.length
     ? paymentEntries
-    : [
-        {
-          paymentDate: "",
-          paymentMethod: "",
-          amount: 0,
-        } as ReceiptPaymentEntry,
-      ];
+    : [{ paymentDate: "", paymentMethod: "", amount: 0 } as ReceiptPaymentEntry];
+
+  const signatoryLabel = signatory?.trim() || "Finance Manager";
+
+  // Build footer line from whatever company fields are set, falling back to
+  // the static Motiva defaults so the preview is never empty.
+  const footerParts: string[] = [];
+  footerParts.push("Motiva");
+  if (companyAddress?.trim()) footerParts.push(companyAddress.trim());
+  if (companyWebsite?.trim()) footerParts.push(companyWebsite.trim());
+  if (companyEmail?.trim()) footerParts.push(companyEmail.trim());
+  if (companyPhone?.trim()) footerParts.push(companyPhone.trim());
+
+  // If only "Motiva" is set, add the static defaults so it isn't bare.
+  if (footerParts.length === 1) {
+    footerParts.push(
+      "123 Estate Avenue, Abuja, Nigeria",
+      "www.motivaestate.com",
+      "info@motivaestate.com",
+      "+234 800 123 4567",
+    );
+  }
+
+  const footerLine = footerParts.join("  |  ");
 
   return (
     <div
@@ -86,19 +125,21 @@ export function ReceiptPreview({
         className="relative text-white"
         style={{ background: NAVY, paddingTop: 40, paddingBottom: 26 }}
       >
+        {/* gold top bar */}
         <div className="absolute inset-x-0 top-0" style={{ height: 5, background: GOLD }} />
 
         <div className="flex items-start justify-between" style={{ padding: "0 56px" }}>
+          {/* Left: logo + RECEIPT heading */}
           <div>
+            {/* Logo — served from /motiva-logo.png (public folder) */}
+            <img
+              src="/motiva-logo.png"
+              alt="Motiva"
+              style={{ width: 52, height: 52, objectFit: "contain", display: "block" }}
+            />
             <div
               className="font-extrabold"
-              style={{ color: GOLD, fontSize: 24, letterSpacing: "0.5px" }}
-            >
-              Motiva
-            </div>
-            <div
-              className="font-extrabold"
-              style={{ fontSize: 38, letterSpacing: "2px", marginTop: 26, lineHeight: 1 }}
+              style={{ fontSize: 38, letterSpacing: "2px", marginTop: 18, lineHeight: 1 }}
             >
               RECEIPT
             </div>
@@ -107,6 +148,7 @@ export function ReceiptPreview({
             </Label>
           </div>
 
+          {/* Right: date / receipt# / issued-to */}
           <div className="text-right" style={{ width: 220 }}>
             <Label color={GOLD}>Date issued</Label>
             <div className="font-semibold" style={{ fontSize: 11, marginTop: 2 }}>
@@ -210,7 +252,12 @@ export function ReceiptPreview({
               return (
                 <tr key={i} style={{ background: i % 2 === 1 ? STRIPE : "transparent" }}>
                   <td
-                    style={{ padding: "8px 10px", fontSize: 9, color: TEXT, verticalAlign: "top" }}
+                    style={{
+                      padding: "8px 10px",
+                      fontSize: 9,
+                      color: TEXT,
+                      verticalAlign: "top",
+                    }}
                   >
                     {i + 1}
                   </td>
@@ -238,7 +285,12 @@ export function ReceiptPreview({
                   </td>
                   <td
                     className="text-right"
-                    style={{ padding: "8px 10px", fontSize: 9, color: TEXT, verticalAlign: "top" }}
+                    style={{
+                      padding: "8px 10px",
+                      fontSize: 9,
+                      color: TEXT,
+                      verticalAlign: "top",
+                    }}
                   >
                     {formatNaira(entry.amount)}
                   </td>
@@ -290,6 +342,7 @@ export function ReceiptPreview({
             minHeight: 110,
           }}
         >
+          {/* Thank you */}
           <div>
             <div className="font-extrabold" style={{ color: NAVY, fontSize: 22 }}>
               THANK YOU!
@@ -297,13 +350,28 @@ export function ReceiptPreview({
             <Label className="mt-1.5 block">Pleasure doing business with you</Label>
           </div>
 
-          <div>
-            <div style={{ borderTop: `1px solid ${NAVY}`, marginBottom: 6 }} />
+          {/* Signature line */}
+          <div className="flex flex-col items-start justify-end">
+            {signatureImage ? (
+              <img
+                src={signatureImage}
+                alt="Signature"
+                style={{
+                  maxWidth: 160,
+                  maxHeight: 70,
+                  objectFit: "contain",
+                  marginBottom: 4,
+                  display: "block",
+                }}
+              />
+            ) : null}
+            <div style={{ borderTop: `1px solid ${NAVY}`, width: "100%", marginBottom: 6 }} />
             <div style={{ fontSize: 9, color: TEXT }}>
-              <span className="font-bold">Finance Manager</span> — Sign, Stamp &amp; Date
+              <span className="font-bold">{signatoryLabel}</span> — Sign, Stamp &amp; Date
             </div>
           </div>
 
+          {/* QR */}
           <div className="flex flex-col items-center" style={{ gap: 5 }}>
             {qrCodeData ? (
               <img src={qrCodeData} alt="Verify receipt" style={{ width: 80, height: 80 }} />
@@ -336,10 +404,7 @@ export function ReceiptPreview({
         <div style={{ borderTop: `1px solid ${GOLD}`, paddingTop: 10, marginTop: 8 }}>
           <Label>Disclaimer</Label>
           <p style={{ fontSize: 8, lineHeight: 1.5, marginTop: 4, color: TEXT }}>
-            This receipt acknowledges the sum received as shown in the payment details above, based
-            on proof of payment forwarded to us. All payments remain subject to confirmation by our
-            accounts department due to the nature of electronic transaction failures and
-            interruptions.
+            {disclaimer?.trim() || DEFAULT_DISCLAIMER}
           </p>
         </div>
 
@@ -354,8 +419,7 @@ export function ReceiptPreview({
             color: "#5c5663",
           }}
         >
-          Motiva &nbsp;|&nbsp; 123 Estate Avenue, Abuja, Nigeria &nbsp;|&nbsp; www.motivaestate.com
-          &nbsp;|&nbsp; info@motivaestate.com &nbsp;|&nbsp; +234 800 123 4567
+          {footerLine}
         </div>
       </div>
 
