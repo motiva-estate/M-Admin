@@ -38,6 +38,7 @@ import { Route as AdminProjectsNewRouteImport } from './routes/admin.projects.ne
 import { Route as AdminPropertiesIndexRouteImport } from './routes/admin.properties.index'
 import { Route as AdminPropertiesIdRouteImport } from './routes/admin.properties.$id'
 import { Route as AdminReceiptsIndexRouteImport } from './routes/admin.receipts.index'
+import { Route as AdminReceiptsIdRouteImport } from './routes/admin.receipts.$id'
 import { Route as AdminSeoIndexRouteImport } from './routes/admin.seo.index'
 import { Route as AdminServicesIndexRouteImport } from './routes/admin.services.index'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin.settings.index'
@@ -197,6 +198,11 @@ const AdminReceiptsIndexRoute = AdminReceiptsIndexRouteImport.update({
   path: '/receipts/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReceiptsIdRoute = AdminReceiptsIdRouteImport.update({
+  id: '/receipts/$id',
+  path: '/receipts/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSeoIndexRoute = AdminSeoIndexRouteImport.update({
   id: '/seo/',
   path: '/seo/',
@@ -278,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/admin/projects/$id': typeof AdminProjectsIdRoute
   '/admin/projects/new': typeof AdminProjectsNewRoute
   '/admin/properties/$id': typeof AdminPropertiesIdRoute
+  '/admin/receipts/$id': typeof AdminReceiptsIdRoute
   '/portal/subscriptions/$id': typeof PortalSubscriptionsIdRoute
   '/admin/audit/': typeof AdminAuditIndexRoute
   '/admin/clients/': typeof AdminClientsIndexRoute
@@ -320,6 +327,7 @@ export interface FileRoutesByTo {
   '/admin/projects/$id': typeof AdminProjectsIdRoute
   '/admin/projects/new': typeof AdminProjectsNewRoute
   '/admin/properties/$id': typeof AdminPropertiesIdRoute
+  '/admin/receipts/$id': typeof AdminReceiptsIdRoute
   '/portal/subscriptions/$id': typeof PortalSubscriptionsIdRoute
   '/admin/audit': typeof AdminAuditIndexRoute
   '/admin/clients': typeof AdminClientsIndexRoute
@@ -365,6 +373,7 @@ export interface FileRoutesById {
   '/admin/projects/$id': typeof AdminProjectsIdRoute
   '/admin/projects/new': typeof AdminProjectsNewRoute
   '/admin/properties/$id': typeof AdminPropertiesIdRoute
+  '/admin/receipts/$id': typeof AdminReceiptsIdRoute
   '/portal/subscriptions/$id': typeof PortalSubscriptionsIdRoute
   '/admin/audit/': typeof AdminAuditIndexRoute
   '/admin/clients/': typeof AdminClientsIndexRoute
@@ -411,6 +420,7 @@ export interface FileRouteTypes {
     | '/admin/projects/$id'
     | '/admin/projects/new'
     | '/admin/properties/$id'
+    | '/admin/receipts/$id'
     | '/portal/subscriptions/$id'
     | '/admin/audit/'
     | '/admin/clients/'
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/admin/projects/$id'
     | '/admin/projects/new'
     | '/admin/properties/$id'
+    | '/admin/receipts/$id'
     | '/portal/subscriptions/$id'
     | '/admin/audit'
     | '/admin/clients'
@@ -497,6 +508,7 @@ export interface FileRouteTypes {
     | '/admin/projects/$id'
     | '/admin/projects/new'
     | '/admin/properties/$id'
+    | '/admin/receipts/$id'
     | '/portal/subscriptions/$id'
     | '/admin/audit/'
     | '/admin/clients/'
@@ -739,6 +751,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReceiptsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/receipts/$id': {
+      id: '/admin/receipts/$id'
+      path: '/receipts/$id'
+      fullPath: '/admin/receipts/$id'
+      preLoaderRoute: typeof AdminReceiptsIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/seo/': {
       id: '/admin/seo/'
       path: '/seo'
@@ -842,6 +861,7 @@ interface AdminRouteChildren {
   AdminProjectsIdRoute: typeof AdminProjectsIdRoute
   AdminProjectsNewRoute: typeof AdminProjectsNewRoute
   AdminPropertiesIdRoute: typeof AdminPropertiesIdRoute
+  AdminReceiptsIdRoute: typeof AdminReceiptsIdRoute
   AdminAuditIndexRoute: typeof AdminAuditIndexRoute
   AdminClientsIndexRoute: typeof AdminClientsIndexRoute
   AdminCompanyIndexRoute: typeof AdminCompanyIndexRoute
@@ -876,6 +896,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminProjectsIdRoute: AdminProjectsIdRoute,
   AdminProjectsNewRoute: AdminProjectsNewRoute,
   AdminPropertiesIdRoute: AdminPropertiesIdRoute,
+  AdminReceiptsIdRoute: AdminReceiptsIdRoute,
   AdminAuditIndexRoute: AdminAuditIndexRoute,
   AdminClientsIndexRoute: AdminClientsIndexRoute,
   AdminCompanyIndexRoute: AdminCompanyIndexRoute,

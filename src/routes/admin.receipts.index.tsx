@@ -1,8 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { format } from "date-fns";
-import { Plus, Receipt as ReceiptIcon, Download, Eye, Trash2, XCircle, Search } from "lucide-react";
+import {
+  Plus,
+  Receipt as ReceiptIcon,
+  Download,
+  Eye,
+  Pencil,
+  Trash2,
+  XCircle,
+  Search,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -37,7 +46,6 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { Paginator } from "@/components/admin/Paginator";
 import { ReceiptStatusBadge } from "@/components/admin/StatusBadges";
 import { api } from "@/lib/api/client";
-import { ReceiptFormDialog } from "@/components/admin/ReceiptFormDialog";
 import { ReceiptViewDialog } from "@/components/admin/ReceiptViewDialog";
 import { VoidReceiptDialog } from "@/components/admin/VoidReceiptDialog";
 import { toast } from "sonner";
@@ -49,12 +57,14 @@ export const Route = createFileRoute("/admin/receipts/")({
 });
 
 function ReceiptsList() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [createOpen, setCreateOpen] = useState(false);
   const [viewReceiptId, setViewReceiptId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
-  const [receiptToDelete, setReceiptToDelete] = useState<{ id: string; number: string } | null>(null);
+  const [receiptToDelete, setReceiptToDelete] = useState<{ id: string; number: string } | null>(
+    null,
+  );
   const [receiptToVoid, setReceiptToVoid] = useState<{ id: string; number: string } | null>(null);
   const [isVoiding, setIsVoiding] = useState(false);
   const [search, setSearch] = useState("");
@@ -103,9 +113,9 @@ function ReceiptsList() {
         description: `Receipt ${receiptToDelete.number} has been deleted.`,
       });
       refetch();
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Error", {
-        description: error.message || "Failed to delete receipt",
+        description: error instanceof Error ? error.message : "Failed to delete receipt",
       });
     } finally {
       setDeleteDialogOpen(false);
@@ -125,9 +135,9 @@ function ReceiptsList() {
       refetch();
       setVoidDialogOpen(false);
       setReceiptToVoid(null);
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Error", {
-        description: error.message || "Failed to void receipt",
+        description: error instanceof Error ? error.message : "Failed to void receipt",
       });
     } finally {
       setIsVoiding(false);
@@ -140,19 +150,10 @@ function ReceiptsList() {
         title="Receipts"
         description="Create and manage payment receipts for clients. Receipts can be downloaded as PDF documents."
         actions={
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button onClick={() => navigate({ to: "/admin/receipts/$id", params: { id: "new" } })}>
             <Plus className="mr-1 h-4 w-4" /> Create Receipt
           </Button>
         }
-      />
-
-      <ReceiptFormDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSuccess={() => {
-          setCreateOpen(false);
-          refetch();
-        }}
       />
 
       {viewReceiptId && (
@@ -169,8 +170,8 @@ function ReceiptsList() {
             <AlertDialogTitle>Delete Receipt</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete receipt{" "}
-              <span className="font-mono font-semibold">{receiptToDelete?.number}</span>?
-              This action cannot be undone.
+              <span className="font-mono font-semibold">{receiptToDelete?.number}</span>? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -238,9 +239,7 @@ function ReceiptsList() {
             <TableBody>
               {receipts.map((receipt) => (
                 <TableRow key={receipt._id || receipt.id}>
-                  <TableCell className="font-mono font-medium">
-                    {receipt.receiptNumber}
-                  </TableCell>
+                  <TableCell className="font-mono font-medium">{receipt.receiptNumber}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {receipt.dateIssued}
                   </TableCell>
@@ -253,6 +252,18 @@ function ReceiptsList() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          navigate({
+                            to: "/admin/receipts/$id",
+                            params: { id: receipt._id || receipt.id },
+                          })
+                        }
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -296,12 +307,7 @@ function ReceiptsList() {
             </TableBody>
           </Table>
           <div className="px-4 pb-3">
-            <Paginator
-              page={page}
-              total={total}
-              pageSize={PAGE_SIZE}
-              onPageChange={setPage}
-            />
+            <Paginator page={page} total={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
           </div>
         </Card>
       )}
