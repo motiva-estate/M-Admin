@@ -16,6 +16,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalLoginRouteImport } from './routes/portal.login'
+import { Route as VerifyReceiptNumberRouteImport } from './routes/verify.$receiptNumber'
 import { Route as AdminAuditIndexRouteImport } from './routes/admin.audit.index'
 import { Route as AdminClientsIndexRouteImport } from './routes/admin.clients.index'
 import { Route as AdminClientsIdRouteImport } from './routes/admin.clients.$id'
@@ -36,6 +37,7 @@ import { Route as AdminProjectsIdRouteImport } from './routes/admin.projects.$id
 import { Route as AdminProjectsNewRouteImport } from './routes/admin.projects.new'
 import { Route as AdminPropertiesIndexRouteImport } from './routes/admin.properties.index'
 import { Route as AdminPropertiesIdRouteImport } from './routes/admin.properties.$id'
+import { Route as AdminReceiptsIndexRouteImport } from './routes/admin.receipts.index'
 import { Route as AdminSeoIndexRouteImport } from './routes/admin.seo.index'
 import { Route as AdminServicesIndexRouteImport } from './routes/admin.services.index'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin.settings.index'
@@ -46,6 +48,7 @@ import { Route as AdminUpdatesIndexRouteImport } from './routes/admin.updates.in
 import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as PortalAccountIndexRouteImport } from './routes/portal.account.index'
 import { Route as PortalDocumentsIndexRouteImport } from './routes/portal.documents.index'
+import { Route as PortalReceiptsIndexRouteImport } from './routes/portal.receipts.index'
 import { Route as PortalSubscriptionsIdRouteImport } from './routes/portal.subscriptions.$id'
 import { Route as PortalUpdatesIndexRouteImport } from './routes/portal.updates.index'
 
@@ -83,6 +86,11 @@ const PortalLoginRoute = PortalLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => PortalRoute,
+} as any)
+const VerifyReceiptNumberRoute = VerifyReceiptNumberRouteImport.update({
+  id: '/verify/$receiptNumber',
+  path: '/verify/$receiptNumber',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAuditIndexRoute = AdminAuditIndexRouteImport.update({
   id: '/audit/',
@@ -184,6 +192,11 @@ const AdminPropertiesIdRoute = AdminPropertiesIdRouteImport.update({
   path: '/properties/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReceiptsIndexRoute = AdminReceiptsIndexRouteImport.update({
+  id: '/receipts/',
+  path: '/receipts/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSeoIndexRoute = AdminSeoIndexRouteImport.update({
   id: '/seo/',
   path: '/seo/',
@@ -234,6 +247,11 @@ const PortalDocumentsIndexRoute = PortalDocumentsIndexRouteImport.update({
   path: '/documents/',
   getParentRoute: () => PortalRoute,
 } as any)
+const PortalReceiptsIndexRoute = PortalReceiptsIndexRouteImport.update({
+  id: '/receipts/',
+  path: '/receipts/',
+  getParentRoute: () => PortalRoute,
+} as any)
 const PortalSubscriptionsIdRoute = PortalSubscriptionsIdRouteImport.update({
   id: '/subscriptions/$id',
   path: '/subscriptions/$id',
@@ -251,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof PortalRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/portal/login': typeof PortalLoginRoute
+  '/verify/$receiptNumber': typeof VerifyReceiptNumberRoute
   '/admin/': typeof AdminIndexRoute
   '/portal/': typeof PortalIndexRoute
   '/admin/clients/$id': typeof AdminClientsIdRoute
@@ -274,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/admin/payments/': typeof AdminPaymentsIndexRoute
   '/admin/projects/': typeof AdminProjectsIndexRoute
   '/admin/properties/': typeof AdminPropertiesIndexRoute
+  '/admin/receipts/': typeof AdminReceiptsIndexRoute
   '/admin/seo/': typeof AdminSeoIndexRoute
   '/admin/services/': typeof AdminServicesIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -284,12 +304,14 @@ export interface FileRoutesByFullPath {
   '/admin/users/': typeof AdminUsersIndexRoute
   '/portal/account/': typeof PortalAccountIndexRoute
   '/portal/documents/': typeof PortalDocumentsIndexRoute
+  '/portal/receipts/': typeof PortalReceiptsIndexRoute
   '/portal/updates/': typeof PortalUpdatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/login': typeof AdminLoginRoute
   '/portal/login': typeof PortalLoginRoute
+  '/verify/$receiptNumber': typeof VerifyReceiptNumberRoute
   '/admin': typeof AdminIndexRoute
   '/portal': typeof PortalIndexRoute
   '/admin/clients/$id': typeof AdminClientsIdRoute
@@ -313,6 +335,7 @@ export interface FileRoutesByTo {
   '/admin/payments': typeof AdminPaymentsIndexRoute
   '/admin/projects': typeof AdminProjectsIndexRoute
   '/admin/properties': typeof AdminPropertiesIndexRoute
+  '/admin/receipts': typeof AdminReceiptsIndexRoute
   '/admin/seo': typeof AdminSeoIndexRoute
   '/admin/services': typeof AdminServicesIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
@@ -323,6 +346,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersIndexRoute
   '/portal/account': typeof PortalAccountIndexRoute
   '/portal/documents': typeof PortalDocumentsIndexRoute
+  '/portal/receipts': typeof PortalReceiptsIndexRoute
   '/portal/updates': typeof PortalUpdatesIndexRoute
 }
 export interface FileRoutesById {
@@ -332,6 +356,7 @@ export interface FileRoutesById {
   '/portal': typeof PortalRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/portal/login': typeof PortalLoginRoute
+  '/verify/$receiptNumber': typeof VerifyReceiptNumberRoute
   '/admin/': typeof AdminIndexRoute
   '/portal/': typeof PortalIndexRoute
   '/admin/clients/$id': typeof AdminClientsIdRoute
@@ -355,6 +380,7 @@ export interface FileRoutesById {
   '/admin/payments/': typeof AdminPaymentsIndexRoute
   '/admin/projects/': typeof AdminProjectsIndexRoute
   '/admin/properties/': typeof AdminPropertiesIndexRoute
+  '/admin/receipts/': typeof AdminReceiptsIndexRoute
   '/admin/seo/': typeof AdminSeoIndexRoute
   '/admin/services/': typeof AdminServicesIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -365,6 +391,7 @@ export interface FileRoutesById {
   '/admin/users/': typeof AdminUsersIndexRoute
   '/portal/account/': typeof PortalAccountIndexRoute
   '/portal/documents/': typeof PortalDocumentsIndexRoute
+  '/portal/receipts/': typeof PortalReceiptsIndexRoute
   '/portal/updates/': typeof PortalUpdatesIndexRoute
 }
 export interface FileRouteTypes {
@@ -375,6 +402,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/admin/login'
     | '/portal/login'
+    | '/verify/$receiptNumber'
     | '/admin/'
     | '/portal/'
     | '/admin/clients/$id'
@@ -398,6 +426,7 @@ export interface FileRouteTypes {
     | '/admin/payments/'
     | '/admin/projects/'
     | '/admin/properties/'
+    | '/admin/receipts/'
     | '/admin/seo/'
     | '/admin/services/'
     | '/admin/settings/'
@@ -408,12 +437,14 @@ export interface FileRouteTypes {
     | '/admin/users/'
     | '/portal/account/'
     | '/portal/documents/'
+    | '/portal/receipts/'
     | '/portal/updates/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin/login'
     | '/portal/login'
+    | '/verify/$receiptNumber'
     | '/admin'
     | '/portal'
     | '/admin/clients/$id'
@@ -437,6 +468,7 @@ export interface FileRouteTypes {
     | '/admin/payments'
     | '/admin/projects'
     | '/admin/properties'
+    | '/admin/receipts'
     | '/admin/seo'
     | '/admin/services'
     | '/admin/settings'
@@ -447,6 +479,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/portal/account'
     | '/portal/documents'
+    | '/portal/receipts'
     | '/portal/updates'
   id:
     | '__root__'
@@ -455,6 +488,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/admin/login'
     | '/portal/login'
+    | '/verify/$receiptNumber'
     | '/admin/'
     | '/portal/'
     | '/admin/clients/$id'
@@ -478,6 +512,7 @@ export interface FileRouteTypes {
     | '/admin/payments/'
     | '/admin/projects/'
     | '/admin/properties/'
+    | '/admin/receipts/'
     | '/admin/seo/'
     | '/admin/services/'
     | '/admin/settings/'
@@ -488,6 +523,7 @@ export interface FileRouteTypes {
     | '/admin/users/'
     | '/portal/account/'
     | '/portal/documents/'
+    | '/portal/receipts/'
     | '/portal/updates/'
   fileRoutesById: FileRoutesById
 }
@@ -495,6 +531,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   PortalRoute: typeof PortalRouteWithChildren
+  VerifyReceiptNumberRoute: typeof VerifyReceiptNumberRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -547,6 +584,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/login'
       preLoaderRoute: typeof PortalLoginRouteImport
       parentRoute: typeof PortalRoute
+    }
+    '/verify/$receiptNumber': {
+      id: '/verify/$receiptNumber'
+      path: '/verify/$receiptNumber'
+      fullPath: '/verify/$receiptNumber'
+      preLoaderRoute: typeof VerifyReceiptNumberRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/audit/': {
       id: '/admin/audit/'
@@ -688,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPropertiesIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/receipts/': {
+      id: '/admin/receipts/'
+      path: '/receipts'
+      fullPath: '/admin/receipts/'
+      preLoaderRoute: typeof AdminReceiptsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/seo/': {
       id: '/admin/seo/'
       path: '/seo'
@@ -758,6 +809,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalDocumentsIndexRouteImport
       parentRoute: typeof PortalRoute
     }
+    '/portal/receipts/': {
+      id: '/portal/receipts/'
+      path: '/receipts'
+      fullPath: '/portal/receipts/'
+      preLoaderRoute: typeof PortalReceiptsIndexRouteImport
+      parentRoute: typeof PortalRoute
+    }
     '/portal/subscriptions/$id': {
       id: '/portal/subscriptions/$id'
       path: '/subscriptions/$id'
@@ -798,6 +856,7 @@ interface AdminRouteChildren {
   AdminPaymentsIndexRoute: typeof AdminPaymentsIndexRoute
   AdminProjectsIndexRoute: typeof AdminProjectsIndexRoute
   AdminPropertiesIndexRoute: typeof AdminPropertiesIndexRoute
+  AdminReceiptsIndexRoute: typeof AdminReceiptsIndexRoute
   AdminSeoIndexRoute: typeof AdminSeoIndexRoute
   AdminServicesIndexRoute: typeof AdminServicesIndexRoute
   AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
@@ -831,6 +890,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPaymentsIndexRoute: AdminPaymentsIndexRoute,
   AdminProjectsIndexRoute: AdminProjectsIndexRoute,
   AdminPropertiesIndexRoute: AdminPropertiesIndexRoute,
+  AdminReceiptsIndexRoute: AdminReceiptsIndexRoute,
   AdminSeoIndexRoute: AdminSeoIndexRoute,
   AdminServicesIndexRoute: AdminServicesIndexRoute,
   AdminSettingsIndexRoute: AdminSettingsIndexRoute,
@@ -849,6 +909,7 @@ interface PortalRouteChildren {
   PortalSubscriptionsIdRoute: typeof PortalSubscriptionsIdRoute
   PortalAccountIndexRoute: typeof PortalAccountIndexRoute
   PortalDocumentsIndexRoute: typeof PortalDocumentsIndexRoute
+  PortalReceiptsIndexRoute: typeof PortalReceiptsIndexRoute
   PortalUpdatesIndexRoute: typeof PortalUpdatesIndexRoute
 }
 
@@ -858,6 +919,7 @@ const PortalRouteChildren: PortalRouteChildren = {
   PortalSubscriptionsIdRoute: PortalSubscriptionsIdRoute,
   PortalAccountIndexRoute: PortalAccountIndexRoute,
   PortalDocumentsIndexRoute: PortalDocumentsIndexRoute,
+  PortalReceiptsIndexRoute: PortalReceiptsIndexRoute,
   PortalUpdatesIndexRoute: PortalUpdatesIndexRoute,
 }
 
@@ -868,6 +930,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   PortalRoute: PortalRouteWithChildren,
+  VerifyReceiptNumberRoute: VerifyReceiptNumberRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -255,13 +255,13 @@ export const api = {
     }): Promise<{ data: Client[]; total: number; page: number; limit: number }> {
       const qs = params
         ? "?" +
-          new URLSearchParams(
-            Object.fromEntries(
-              Object.entries(params)
-                .filter(([, v]) => v != null && v !== "")
-                .map(([k, v]) => [k, String(v)]),
-            ),
-          ).toString()
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(params)
+              .filter(([, v]) => v != null && v !== "")
+              .map(([k, v]) => [k, String(v)]),
+          ),
+        ).toString()
         : "";
       return req<{ data: any[]; total: number; page: number; limit: number }>(
         "GET",
@@ -305,13 +305,13 @@ export const api = {
     }): Promise<{ data: Subscription[]; total: number; page: number; limit: number }> {
       const qs = params
         ? "?" +
-          new URLSearchParams(
-            Object.fromEntries(
-              Object.entries(params)
-                .filter(([, v]) => v != null && v !== "")
-                .map(([k, v]) => [k, String(v)]),
-            ),
-          ).toString()
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(params)
+              .filter(([, v]) => v != null && v !== "")
+              .map(([k, v]) => [k, String(v)]),
+          ),
+        ).toString()
         : "";
       return req<{ data: any[]; total: number; page: number; limit: number }>(
         "GET",
@@ -342,13 +342,13 @@ export const api = {
     async list(params?: { page?: number; limit?: number }) {
       const qs = params
         ? "?" +
-          new URLSearchParams(
-            Object.fromEntries(
-              Object.entries(params)
-                .filter(([, v]) => v != null)
-                .map(([k, v]) => [k, String(v)]),
-            ),
-          ).toString()
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(params)
+              .filter(([, v]) => v != null)
+              .map(([k, v]) => [k, String(v)]),
+          ),
+        ).toString()
         : "";
       return req<{ data: any[]; total: number; page: number; limit: number }>(
         "GET",
@@ -376,19 +376,96 @@ export const api = {
     },
   },
 
+  // ── CRM: Receipts ─────────────────────────────────────────────────────────
+  receipts: {
+    ...makeRestCrud<{
+      id: string;
+      receiptNumber: string;
+      dateIssued: string;
+      clientId: string;
+      paymentDescription: string;
+      amountReceived: number;
+      paymentEntries: Array<{
+        paymentDate: string;
+        paymentMethod: string;
+        bankName?: string;
+        accountNumber?: string;
+        amount: number;
+      }>;
+      totalPaid: number;
+      amountInWords: string;
+      qrCodeData?: string;
+      pdfUrl?: string;
+      status: 'DRAFT' | 'ISSUED' | 'VOIDED';
+    }>("receipts"),
+    async list(params?: { page?: number; limit?: number; clientId?: string; status?: string; search?: string }) {
+      const qs = params
+        ? "?" +
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(params)
+              .filter(([, v]) => v != null && v !== "")
+              .map(([k, v]) => [k, String(v)]),
+          ),
+        ).toString()
+        : "";
+      return req<{ data: any[]; total: number; page: number; limit: number }>(
+        "GET",
+        `/receipts${qs}`,
+      );
+    },
+    async byClient(clientId: string) {
+      return req<any[]>("GET", `/receipts/by-client/${clientId}`);
+    },
+    async verify(receiptNumber: string) {
+      return req<{ receipt: any; client: any }>("GET", `/receipts/verify/${receiptNumber}`, undefined, { noAuth: true });
+    },
+    async getWithClient(id: string) {
+      return req<{ receipt: any; client: any }>("GET", `/receipts/${id}/with-client`);
+    },
+    async generatePDF(id: string) {
+      return req<{ url: string; buffer: string }>("POST", `/receipts/${id}/generate-pdf`);
+    },
+    async downloadPDF(id: string) {
+      const token = activeToken();
+      const response = await fetch(`${BASE}/receipts/${id}/download-pdf`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Receipt-${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    },
+    async void(id: string, reason: string) {
+      return req<any>("POST", `/receipts/${id}/void`, { reason });
+    },
+  },
+
   // ── CRM: Enquiries ────────────────────────────────────────────────────────
   enquiries: {
     ...makeRestCrud<Enquiry>("enquiries"),
     async list(params?: { status?: string; assignedToId?: string; page?: number; limit?: number }) {
       const qs = params
         ? "?" +
-          new URLSearchParams(
-            Object.fromEntries(
-              Object.entries(params)
-                .filter(([, v]) => v != null && v !== "")
-                .map(([k, v]) => [k, String(v)]),
-            ),
-          ).toString()
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(params)
+              .filter(([, v]) => v != null && v !== "")
+              .map(([k, v]) => [k, String(v)]),
+          ),
+        ).toString()
         : "";
       return req<{ data: any[]; total: number; page: number; limit: number }>(
         "GET",
@@ -471,13 +548,13 @@ export const api = {
     async list(params?: { projectRef?: string; page?: number; limit?: number }) {
       const qs = params
         ? "?" +
-          new URLSearchParams(
-            Object.fromEntries(
-              Object.entries(params)
-                .filter(([, v]) => v != null && v !== "")
-                .map(([k, v]) => [k, String(v)]),
-            ),
-          ).toString()
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(params)
+              .filter(([, v]) => v != null && v !== "")
+              .map(([k, v]) => [k, String(v)]),
+          ),
+        ).toString()
         : "";
       return req<{ data: any[]; total: number; page: number; limit: number }>(
         "GET",
@@ -514,13 +591,13 @@ export const api = {
     async list(params?: { entityType?: string; entityId?: string; page?: number; limit?: number }) {
       const qs = params
         ? "?" +
-          new URLSearchParams(
-            Object.fromEntries(
-              Object.entries(params)
-                .filter(([, v]) => v != null && v !== "")
-                .map(([k, v]) => [k, String(v)]),
-            ),
-          ).toString()
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(params)
+              .filter(([, v]) => v != null && v !== "")
+              .map(([k, v]) => [k, String(v)]),
+          ),
+        ).toString()
         : "";
       return req<{ data: any[]; total: number; page: number; limit: number }>(
         "GET",
@@ -600,6 +677,23 @@ export const api = {
       return req<any>("GET", `/portal/subscriptions/${id}`).then((d) => {
         if (d && d._id && !d.id) d.id = d._id;
         return d as Subscription;
+      });
+    },
+
+    /** All receipts belonging to the logged-in subscriber. */
+    async listReceipts() {
+      const list = await req<any[]>("GET", "/portal/receipts");
+      return list.map((d) => {
+        if (d._id && !d.id) d.id = d._id;
+        return d;
+      });
+    },
+
+    /** A single receipt (ownership-checked server-side). */
+    async getReceipt(id: string) {
+      return req<any>("GET", `/portal/receipts/${id}`).then((d) => {
+        if (d && d._id && !d.id) d.id = d._id;
+        return d;
       });
     },
   },

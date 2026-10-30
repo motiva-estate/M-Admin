@@ -21,6 +21,7 @@ import {
   FileText,
   Megaphone,
   Wallet,
+  Receipt,
 } from "lucide-react";
 
 import {
@@ -58,6 +59,7 @@ const CRM: Item[] = [
   { title: "Clients", url: "/admin/clients", icon: UserCircle2, require: "clients.manage" },
   { title: "Subscriptions", url: "/admin/subscriptions", icon: CreditCard, require: "subscriptions.manage" },
   { title: "Payments", url: "/admin/payments", icon: Wallet, require: "subscriptions.manage" },
+  { title: "Receipts", url: "/admin/receipts", icon: Receipt, require: "subscriptions.manage" },
   { title: "Documents", url: "/admin/documents", icon: FileText, require: "subscriptions.manage" },
   { title: "Project updates", url: "/admin/updates", icon: Megaphone, require: "content.edit" },
   { title: "Enquiries", url: "/admin/enquiries", icon: Mail, require: "enquiries.assign" },
