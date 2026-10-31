@@ -132,11 +132,19 @@ export function ReceiptPreview({
           {/* Left: logo + RECEIPT heading */}
           <div>
             {/* Logo — served from /motiva-logo.png (public folder) */}
-            <img
-              src="/motiva-logo.png"
-              alt="Motiva"
-              style={{ width: 52, height: 52, objectFit: "contain", display: "block" }}
-            />
+            <div className="flex items-center">
+              <img
+                src="/motiva-logo.png"
+                alt="Motiva"
+                style={{ width: 52, height: 52, objectFit: "contain", display: "block" }}
+              />
+              <div
+                className="font-extrabold"
+                style={{ color: GOLD, fontSize: 24, letterSpacing: "0.5px" }}
+              >
+                Motiva
+              </div>
+            </div>
             <div
               className="font-extrabold"
               style={{ fontSize: 38, letterSpacing: "2px", marginTop: 18, lineHeight: 1 }}
