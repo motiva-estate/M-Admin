@@ -499,7 +499,7 @@ export function ScaledReceipt({
   }, []);
 
   return (
-    <div ref={viewportRef} className="w-full">
+    <div ref={viewportRef} className="w-full overflow-hidden">
       <div style={{ height: contentHeight ? contentHeight * scale : undefined }}>
         <div
           ref={contentRef}
